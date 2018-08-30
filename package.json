@@ -6,7 +6,7 @@
     "start": "supervisor server.js"
     ,"//": "if --file ; then mocha $(find api -regex '.*/**/*'&& --file &&'.spec.js') --timeout 10000 --exit; else mocha $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit; fi"
     , "//": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit"
-    ,"test": "mocha $(find api -regex '.*/**/*update-recall.ctrl.spec.js') --timeout 10000 --exit"
+    ,"test": "mocha $(find api -regex '.*/**/*todo.spec.js') --timeout 10000 --exit"
   },
   "author": "",
   "license": "ISC",

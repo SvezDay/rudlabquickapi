@@ -31,6 +31,10 @@ module.exports = ()=>{
       .delete('/document/delete-document-recursively', require('./document/delete-document-recursively.ctrl').main)
       .delete('/document/delete-document', require('./document/delete-document.ctrl').main)
       .delete('/document/delete-note', require('./document/delete-note.ctrl').main)
+    // ACTIVITY
+       .get('/activity/get-main', require('./activity/get-main.ctrl').main)
+       .post('/activity/create-activity', require('./activity/create-activity.ctrl').main)
+       .post('/activity/create-event', require('./activity/create-event.ctrl').main)
    // FREE
      .post('/free/graph-detail', require('./free/read-graph-detail.ctrl').main)
      .post('/free/create-note', require('./free/create-note.ctrl').main)
