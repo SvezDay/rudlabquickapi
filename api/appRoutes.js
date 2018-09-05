@@ -63,6 +63,8 @@ module.exports = ()=>{
    // GAME
       .get('/games/suspended', require('./games/get-suspended.ctrl').main)
       .put('/games/update-brut-data', require('./games/update-brut-data.ctrl').main)
+   // GAME - RECALL
+      .get('/recall/main-list', require('./recall/main-list.ctrl').main)
    // GAME RECALL ONE
      .post('/games-recall-one/scoring/win', require('./games-recall-one/scoring.ctrl').win)
      .post('/games-recall-one/scoring/lose', require('./games-recall-one/scoring.ctrl').lose)

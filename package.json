@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "api rest for rudlab bubble",
   "scripts": {
-    "start": "supervisor server.js"
-    ,"//": "if --file ; then mocha $(find api -regex '.*/**/*'&& --file &&'.spec.js') --timeout 10000 --exit; else mocha $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit; fi"
-    , "//": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit"
-    ,"test": "mocha $(find api -regex '.*/**/*todo.spec.js') --timeout 10000 --exit"
+    "start": "supervisor server.js",
+    "//": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit",
+    "test": "mocha $(find api -regex '.*/**/*todo.spec.js') --timeout 10000 --exit"
   },
   "author": "",
   "license": "ISC",
@@ -16,10 +15,10 @@
     "cors": "^2.8.4",
     "email-validator": "^1.2.3",
     "express": "^4.16.3",
-    "jsonwebtoken": "^8.2.1",
+    "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
     "morgan": "^1.9.0",
-    "neo4j-driver": "^1.6.1",
+    "neo4j-driver": "^1.6.3",
     "parse-neo4j": "^0.6.11",
     "path": "^0.12.7",
     "serve-favicon": "^2.5.0",
@@ -29,8 +28,8 @@
   "devDependencies": {
     "@angular/cli": "^1.7.4",
     "chai": "^4.1.2",
-    "chai-http": "^4.0.0",
-    "jasmine": "^3.1.0",
+    "chai-http": "^4.2.0",
+    "jasmine": "^3.2.0",
     "mocha": "^5.2.0"
   }
 }
