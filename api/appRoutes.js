@@ -28,6 +28,7 @@ module.exports = ()=>{
       .get('/document/read-document', require('./document/read-document.ctrl').main)
       .get('/document/read-extend-document', require('./document/read-extend-document.ctrl').main)
       .put('/document/update-title', require('./document/update-title.ctrl').main)
+      .put('/document/update-note-label', require('./document/update-note-label.ctrl').main)
       .delete('/document/delete-document-recursively', require('./document/delete-document-recursively.ctrl').main)
       .delete('/document/delete-document', require('./document/delete-document.ctrl').main)
       .delete('/document/delete-note', require('./document/delete-note.ctrl').main)
@@ -39,7 +40,7 @@ module.exports = ()=>{
      .post('/free/graph-detail', require('./free/read-graph-detail.ctrl').main)
      .post('/free/create-note', require('./free/create-note.ctrl').main)
      .put('/free/update-note-value', require('./free/update-note-value.ctrl').main)
-     .put('/free/update-note-label', require('./free/update-note-label.ctrl').main)
+     // .put('/free/update-note-label', require('./free/update-note-label.ctrl').main)
      .put('/free/update-order', require('./free/update-order.ctrl').main)
      .delete('/free/delete-graph', require('./free/delete-graph.ctrl').main)
      .delete('/free/delete-graph-and-descendant', require('./free/delete-graph-and-descendant.ctrl').main)
@@ -60,18 +61,31 @@ module.exports = ()=>{
    // TREE
       .post('/tree/move', require('./tree/move.ctrl').main)
       .get('/tree', require('./tree/tree.ctrl').main)
-   // GAME
+
+// GAME
       .get('/games/suspended', require('./games/get-suspended.ctrl').main)
       .put('/games/update-brut-data', require('./games/update-brut-data.ctrl').main)
-   // GAME - RECALL
-      .get('/recall/main-list', require('./recall/main-list.ctrl').main)
+// GAME - RECALL
+      .post('/recall/create-index-recall', require('./games/recall/create-index-recall.ctrl').main)
+      .post('/recall/create-recall', require('./games/recall/create-recall.ctrl').main)
+      .get('/recall/main-list', require('./games/recall/main-list.ctrl').main)
+      .get('/recall/run', require('./games/recall/run.ctrl').main)
+      .get('/recall/suspended-recall-list', require('./games/recall/suspended-recall-list.ctrl').main)
+      .put('/recall/update-recallable-state', require('./games/recall/update-recallable-state.ctrl').main)
+      .put('/recall/update-recall', require('./games/recall/update-recall.ctrl').main)
+      .put('/recall/scoring', require('./games/recall/scoring.ctrl').main)
+      .put('/recall/update-status-recall', require('./games/recall/update-status-recall.ctrl').main)
+      .put('/recall/update-recallable-state', require('./games/recall/update-recallable-state.ctrl').main)
+      .put('/recall/update-index-recall-next-deadline', require('./games/recall/update-index-recall-next-deadline.ctrl').main)
+      .delete('/recall/delete-index-recall', require('./games/recall/delete-index-recall.ctrl').main)
+      .delete('/recall/delete-recall', require('./games/recall/delete-recall.ctrl').main)
    // GAME RECALL ONE
-     .post('/games-recall-one/scoring/win', require('./games-recall-one/scoring.ctrl').win)
-     .post('/games-recall-one/scoring/lose', require('./games-recall-one/scoring.ctrl').lose)
-     .get('/games-recall-one/update-recall', require('./games-recall-one/update-recall.ctrl').main)
-     .get('/games-recall-one/run', require('./games-recall-one/run.ctrl').main)
-     .put('/games-recall-one/status', require('./games-recall-one/status.ctrl').main)
-     .put('/games-recall-one/recallStatus', require('./games-recall-one/status.ctrl').recallStatus)
+     // .post('/games-recall-one/scoring/win', require('./games-recall-one/scoring.ctrl').win)
+     // .post('/games-recall-one/scoring/lose', require('./games-recall-one/scoring.ctrl').lose)
+     // .get('/games-recall-one/update-recall', require('./games-recall-one/update-recall.ctrl').main)
+     // .get('/games-recall-one/run', require('./games-recall-one/run.ctrl').main)
+     // .put('/games-recall-one/status', require('./games-recall-one/status.ctrl').main)
+     // .put('/games-recall-one/recallStatus', require('./games-recall-one/status.ctrl').recallStatus)
 
    return routes;
 };

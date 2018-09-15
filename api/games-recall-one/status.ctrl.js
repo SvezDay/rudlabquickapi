@@ -24,11 +24,11 @@ module.exports.main = (req, res, next)=>{
   let ps = req.body;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
-  // console.log("ps", ps)
+  console.log("ps", typeof ps.status)
 
   validator.uuid(ps.idx_uuid, "ps.idx_uuid")
   .then(() => validator.boolean(ps.status, "ps.status") )
-  .then(() => validator.boolean(ps.descendant, "") )
+  .then(() => validator.boolean(ps.descendant, "ps.descendant") )
   .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
   .then(() => {
     let one = ` MATCH (i:Index{uuid:$idx_uuid})-[]->(t:Title) SET t.course = $status`;

@@ -55,6 +55,11 @@ const self = {
         reject({err: `${name} is not a boolean: ${data}`}) : resolve()
     })
   },
+  enum: (data, enums,)=>{
+    return new Promise((resolve, reject)=>{
+      !enums.includes(data) ? reject({err: `This is not an enum: ${data}`}) : resolve()
+    })
+  },
   timestamp: (data, name="A Param")=>{
     return new Promise((resolve, reject)=>{
       if(isNaN(data) || typeof data != 'string'){

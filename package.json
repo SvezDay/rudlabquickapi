@@ -1,11 +1,12 @@
 {
   "name": "rudlabapi",
   "version": "1.0.0",
-  "description": "api rest for rudlab bubble",
+  "description": "api rest for rudlab ",
   "scripts": {
-    "start": "supervisor server.js",
-    "//": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit",
-    "test": "mocha $(find api -regex '.*/**/*todo.spec.js') --timeout 10000 --exit"
+    "start": "supervisor server.js"
+    ,"test": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit  --bail"
+    ,"//": "pour utiliser testf :: npm run testf api/games/spec/recall.test1.spec.js"
+    ,"testf": "mocha ${file} --timeout 10000 --exit"
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +31,7 @@
     "chai": "^4.1.2",
     "chai-http": "^4.2.0",
     "jasmine": "^3.2.0",
+    "jest": "^23.6.0",
     "mocha": "^5.2.0"
   }
 }

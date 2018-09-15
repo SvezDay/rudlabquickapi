@@ -12,13 +12,9 @@ const miscellaneousReq = require('../_services/miscellaneous.request');
 // COMMON ----------------------------------------------------------------------
 const commonData = require('../_models/common.data');
 // CONTROLLERS -----------------------------------------------------------------
+let deleteRecall = require('../games/recall/delete-recall.ctrl').deleteRecall;
 
-/*
-* By:
-* Input: tx, note_uuid
-* Output: model
-*/
-module.exports.deleteNote = (tx, note_uuid)=>{
+module.exports.deleteNote = (tx, note_uuid)=>{ // Input: tx, note_uuid  | Output: model
   return new Promise((resolve, reject)=>{
     let now = new Date().getTime();
 
@@ -26,7 +22,7 @@ module.exports.deleteNote = (tx, note_uuid)=>{
     MATCH (n:Note{uuid:$note_uuid})
     OPTIONAL MATCH p1=(n)-[:Manage]->(is:Index)
     WITH n, COUNT(is) AS countis
-    
+
     CALL apoc.do.when(countis>0
         ,' MATCH (t:Title)-[*]->(n:Note)-[:Manage]->(is:Index) WHERE n={n} UNWIND is.uuid AS isu MATCH (isum:Index{uuid:is.uuid}) CREATE (t)-[:Manage]->(isum) RETURN n AS note'
         ,'MATCH (n) WHERE n={n} RETURN n AS note',{n:n}) YIELD value
@@ -47,12 +43,8 @@ module.exports.deleteNote = (tx, note_uuid)=>{
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/deleteNote'}); })
   })
 }
-/*
-* By:
-* Input: note_uuid
-* Output: void
-*/
-module.exports.main = (req, res, next)=>{
+
+module.exports.main = (req, res, next)=>{ // Input: note_uuid   |  Output: void
   let ps = req.headers;
   let tx = driver.session().beginTransaction();
   ps.uid = req.decoded.uuid;
@@ -62,6 +54,7 @@ module.exports.main = (req, res, next)=>{
   .then(()=> miscellaneousReq.access2Any(tx, ps.uid, ps.note_uuid) )
 
   .then(()=>  this.deleteNote(tx, ps.note_uuid))
+  .then(()=> deleteRecall(tx, ps.note_uuid) )
 
   .then(data=> utils.commit(tx, res, ps.uid, data) )
   .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/main'}, res, tx)} )

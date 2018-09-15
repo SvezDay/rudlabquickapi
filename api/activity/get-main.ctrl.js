@@ -25,8 +25,8 @@ module.exports.getMain = (tx, uid)=>{
       // console.log('model_documentation', model_documentation)
       // console.log("query", query)
     tx.run(query, {model:model, uid:uid}).then(parser.parse)
-    // .then(result=>{console.log(result); return result; })
-    .then(result=>resolve(result[0]) )
+    // .then(result=>{console.log('result', result); return result; })
+    .then(result=>resolve(result) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'activity/getMain.ctrl.js/getMain'}); })
   })
 }

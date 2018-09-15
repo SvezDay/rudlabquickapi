@@ -11,11 +11,11 @@ module.exports.getGraph = (tx, uid, idx_uuid)=>{
   // GET INDEX'S TITLE AND NODES
   return new Promise((resolve, reject)=>{
     let query = `
-      MATCH (p:Person{uuid:'${uid}'})
-      MATCH path=(p)-[*]->(i:Index{uuid:'${idx_uuid}'})-[:Has]->(tit:Title)
+      MATCH (p:Person{uuid:$uid})
+      MATCH path=(p)-[*]->(i:Index{uuid:$idx_uuid})-[:Has]->(tit:Title)
       OPTIONAL MATCH (tit)-[:Has*]->(note:Note)
-      RETURN {index: {uuid: i.uuid, model:i.model}, title:{uuid:tit.uuid, value:tit.value, course:tit.course}, notes:COLLECT(DISTINCT {uuid:note.uuid, value:note.value, code_label:note.code_label}) } `;
-    tx.run(query).then(parser.parse)
+      RETURN {index: {uuid: i.uuid, model:i.model}, title:{uuid:tit.uuid, value:tit.value, recallable:tit.recallable, code_label:tit.code_label}, notes:COLLECT(DISTINCT {uuid:note.uuid, value:note.value, code_label:note.code_label}) } `;
+    tx.run(query, {uid:uid, idx_uuid:idx_uuid}).then(parser.parse)
     // Supprimer le note null dans les notes
     .then(data => {
       data[0].notes[0].uuid==null ? data[0].notes = [] : null
@@ -57,7 +57,7 @@ module.exports.getHeadGraph = (tx, idx_uuid)=>{
   return new Promise((resolve, reject)=>{
     let query = `
       MATCH (i:Index{uuid:$idx_uuid})-[:Has]->(tit:Title)
-      RETURN {index:{uuid: i.uuid, model:i.model}, title:{uuid:tit.uuid, value:tit.value}} `;
+      RETURN {index:{uuid: i.uuid, model:i.model}, title:{uuid:tit.uuid, value:tit.value, recallable:tit.recallable, code_label:tit.code_label}} `;
     tx.run(query, {idx_uuid:idx_uuid}).then(parser.parse)
     // tx.run(query).then(data => {console.log("getHeadGraph", data); return data} ).then(parser.parse).then(data => {console.log("getHeadGraph", data); return data} )
     .then(data => { resolve(data[0])})

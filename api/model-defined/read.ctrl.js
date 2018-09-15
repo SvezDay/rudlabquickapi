@@ -18,7 +18,7 @@ module.exports.read = (tx, idx_uuid)=>{
     let one = `
     MATCH (i:Index{uuid:$idx_uuid})-[]->(t:Title)
     OPTIONAL MATCH (t)-[*]->(ns:Note)
-    RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.title, value:t.value, course:t.course}, notes:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}`;
+    RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.title, value:t.value, recallable:t.recallable}, notes:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}`;
 
     tx.run(one, {idx_uuid:idx_uuid}).then(parser.parse)
     .then(data => {

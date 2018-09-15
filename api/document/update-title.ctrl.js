@@ -19,6 +19,7 @@ const graphReq = require('../_services/graph.request');
 */
 module.exports.updateTitle = (tx, uuid, value)=>{
   return new Promise((resolve, reject)=>{
+    let now = new Date().getTime();
     let query = `
       MATCH (t:Title{uuid:$uuid})
       SET t.value = $value
@@ -36,7 +37,6 @@ module.exports.main = (req, res, next)=>{
   let ps = req.body;
   let tx = driver.session().beginTransaction();
   ps.uid = req.decoded.uuid;
-  ps.now = new Date().getTime();
 
   validator.uuid(ps.up_uuid, 'ps.up_uuid')
   .then(() => { return validator.uuid(ps.idx_uuid, 'ps.idx_uuid') })

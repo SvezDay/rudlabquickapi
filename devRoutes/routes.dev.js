@@ -8,6 +8,15 @@ let tokenGen = require('../api/_services/token.service');
 
 
 
+module.exports.query = (req, res, next)=>{
+  let tx = driver.session().beginTransaction();
+  // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%ù query req.body:', req.body)
+  tx.run(req.body.query).then(parser.parse)
+  .then(data=>{console.log('@@@@@@@@@@@@@@@@@@@@ query data:',data); return data; })
+  .then(data=>{ tx.commit(); res.status(200).json({data:data}); })
+  .catch(err=>{console.log(err); reject(err)});
+};
+
 module.exports.createDicoItem = (req, res, next)=>{
   let tx = driver.session().beginTransaction();
   // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%ù req.body', req.body)
@@ -61,6 +70,8 @@ module.exports.getPerson = (req, res, next)=>{
 module.exports = ()=>{
   let routes = express.Router();
   routes
+  .post('/query', this.query) // this route send a full query
+  //
   .post('/create-dico-item', this.createDicoItem)
   .delete('/clear-database', this.clearDatabase)
   .get('/node-list', this.nodeList)

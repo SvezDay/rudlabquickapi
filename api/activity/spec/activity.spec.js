@@ -4,6 +4,7 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../../../server');
 let should = chai.should();
+let expect = chai.expect;
 chai.use(chaiHttp);
 
 const path = require('path');
@@ -14,6 +15,8 @@ let token;
 
 let todoA;
 let todoB;
+
+describe('ACTIVITY ************************************************************* activity.spec.js',()=>{it('INIT',(done)=>{done()})})
 
 describe('CLEAR DATABASE', ()=>{
   it('should return nothing', (done)=>{
@@ -109,9 +112,7 @@ describe('CREATE ACTIVITY',()=>{
     .end((err, res)=>{
       res.should.have.status(200);
       res.body.should.have.property('data');
-      res.body.data.should.be.an('array');
-      // res.body.data.length.should.equal(1);
-      res.body.data[0].index.uuid.should.equal(todoA.index.uuid);
+      expect(res.body.data.map(x=>x.index.uuid)).to.include(todoA.index.uuid, 'ERROR');
       done();
     })
   })

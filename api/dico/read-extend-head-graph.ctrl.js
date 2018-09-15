@@ -26,7 +26,7 @@ module.exports.getExtendHeadGraph = (tx, idx_uuid)=>{
     let query = `
       MATCH (i:Index{uuid:$idx_uuid})-[]->(t:Title)
       OPTIONAL MATCH (t)-[]->(ns:Note)
-      RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, course:t.course}, item:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}
+      RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable}, item:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}
     `;
     // console.log('query', query)
     tx.run(query,{idx_uuid:idx_uuid}).then(parser.parse)

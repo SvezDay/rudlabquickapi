@@ -29,14 +29,14 @@ module.exports.createDocument = (tx, model, parent_uuid)=>{
       let one = `
       MATCH (parent{uuid:$parent_uuid})
       CREATE (idx:Index{commitList: [$now], model: $model, uuid:apoc.create.uuid()})
-      CREATE (t:Title {value:'Undefined', uuid:apoc.create.uuid(), course: false})`;
+      CREATE (t:Title {value:'Undefined', uuid:apoc.create.uuid(), recallable: false, code_label:1.2})`;
 
       let two=` CREATE (parent)-[:Manage]->(idx)-[:Has{commit:$now}]->(t)`;
       for(var i = 0; i<nativeLabel.length; i++){
         one+=` CREATE (n${i}:Note{uuid:apoc.create.uuid(), code_label:${nativeLabel[i]}, value:'Undefined'}) `;
         two+=`-[:Has{commit:$now}]->(n${i})`
       }
-      two += ' RETURN {index:{uuid:idx.uuid, model:idx.model}, title:{uuid:t.uuid, value:t.value, course:t.course}}'
+      two += ' RETURN {index:{uuid:idx.uuid, model:idx.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable, code_label:t.code_label}}'
       // console.log("query", one+two)
       return tx.run(one+two, {parent_uuid:parent_uuid, model:model, now:now}).then(parser.parse)
     })

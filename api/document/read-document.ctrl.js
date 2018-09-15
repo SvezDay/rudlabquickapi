@@ -24,7 +24,7 @@ module.exports.readDocument = (tx, idx_uuid)=>{
       ,' OPTIONAL MATCH (t)-[:Has*]->(ns:Note) WHERE t={t} RETURN ns AS notes'
       ,{t:t})YIELD value
     WITH i, t, value.notes as ns
-    RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, course:t.course}, notes:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}`;
+    RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable, code_label:t.code_label}, notes:COLLECT(DISTINCT {uuid:ns.uuid, value:ns.value, code_label:ns.code_label})}`;
 
     tx.run(one, {idx_uuid:idx_uuid}).then(parser.parse)
     .then(data => {
@@ -35,12 +35,8 @@ module.exports.readDocument = (tx, idx_uuid)=>{
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/read-document.ctrl.js/readDocument'}); })
   })
 }
-/*
-* By:
-* Input: idx_uuid
-* Output: document
-*/
-module.exports.main = (req, res, next)=>{
+
+module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: document
   let ps = req.headers;
   let tx = driver.session().beginTransaction();
   ps.uid = req.decoded.uuid;

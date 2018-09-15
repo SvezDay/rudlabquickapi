@@ -23,7 +23,7 @@ module.exports.getMain = (tx, uid)=>{
       WITH $model_documentation as list
       MATCH (a:Person{uuid:$uid})-[]->(i:Index)-[]->(t:Title)
       WHERE i.model in list
-      RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value}} `;
+      RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable, code_label:t.code_label}} `;
 
       // console.log('model_documentation', model_documentation)
       // console.log("query", query)
@@ -42,8 +42,8 @@ module.exports.main = (req, res, next)=>{
   let tx = driver.session().beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps main getMain', ps)
-  validator.uuid(ps.uid, 'ps.uid')
-  .then(()=> this.getMain(tx, ps.uid) )
+
+  this.getMain(tx, ps.uid)
   .then( data => utils.commit(tx, res, ps.uid, data) )
   .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/get-main.ctr.js/main'}, res, tx)} )
 
