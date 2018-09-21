@@ -38,6 +38,6 @@ module.exports.main = (req, res, next)=>{
     return Promise.all(promises);
   })
 
-  .then(() => utils.commit(tx, res, ps.uid) )
+  .then(() => utils.commit(tx, res, ps.uid, dico) )
   .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'game/get-suspended.ctrl.js/main'}, res, tx)} )
 };

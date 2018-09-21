@@ -8,9 +8,9 @@ const utils = require('./utils.service');
 */
 module.exports.access2Index = (tx, uid, idx_uuid)=>{
   return new Promise((resolve, reject)=>{
-      let query =` MATCH (acc:Person{uuid:$uid}) OPTIONAL MATCH (acc)-[*]->(idx:Index{uuid:$idx_uuid}) RETURN COUNT(idx) as count`;
+      let query =` MATCH (acc:Person{uuid:$uid}) OPTIONAL MATCH (acc)-[*]->(idx:Index{uuid:'${idx_uuid}'}) RETURN COUNT(idx) as count`;
       return tx.run(query, {uid:uid, idx_uuid:idx_uuid}).then(parser.parse)
-      .then( result => { if(!result[0]){ throw {status: 403, mess: `access2Index() user access failed: ${idx_uuid}`} } })
+      .then( result => { if(!result[0]){ throw {status: 403, mess: `access2Index() user access failed: ${idx_uuid}: user:${uid}`} } })
       .then(result => resolve() )
       .catch(err =>{console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',err); reject({status: err.status || 400, mess: err.mess || '_services/miscellaneous.request.js/access2Index'}); })
   })
@@ -50,7 +50,7 @@ module.exports.access2Any = (tx, uid, any_uuid)=>{
   return new Promise((resolve, reject)=>{
       let query =` MATCH (acc:Person{uuid:$uid}) OPTIONAL MATCH (acc)-[*]->(any{uuid:$any_uuid}) RETURN COUNT(any) as count`;
       tx.run(query, {uid:uid, any_uuid:any_uuid}).then(parser.parse)
-      .then( result => { if(!result[0]){ throw {status: 403, mess: `access2Node() user access failed: ${any_uuid}`} } })
+      .then( result => { if(!result[0]){ throw {status: 403, mess: `access2Any() user access failed: ${any_uuid}`} } })
       .then(result => resolve() )
       .catch(err =>{console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',err); reject({status: err.status || 400, mess: err.mess || '_services/miscellaneous.request.js/access2Any'}); })
   })

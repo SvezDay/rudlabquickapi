@@ -6,7 +6,7 @@
     "start": "supervisor server.js"
     ,"test": "mocha  $(find api -regex '.*/**/*.spec.js') --timeout 10000 --exit  --bail"
     ,"//": "pour utiliser testf :: npm run testf api/games/spec/recall.test1.spec.js"
-    ,"testf": "mocha ${file} --timeout 10000 --exit"
+    ,"testf": "mocha ${file} --exit --bail"
   },
   "author": "",
   "license": "ISC",

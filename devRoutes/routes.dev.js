@@ -9,13 +9,14 @@ let tokenGen = require('../api/_services/token.service');
 
 
 module.exports.query = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
   // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%ù query req.body:', req.body)
+  let tx = driver.session().beginTransaction();
   tx.run(req.body.query).then(parser.parse)
   .then(data=>{console.log('@@@@@@@@@@@@@@@@@@@@ query data:',data); return data; })
-  .then(data=>{ tx.commit(); res.status(200).json({data:data}); })
-  .catch(err=>{console.log(err); reject(err)});
+  .then(data=>{ tx.commit(); res.status(200).json({data:data});  })
+  .catch(err=>{console.log(err); tx.rollback()});
 };
+
 
 module.exports.createDicoItem = (req, res, next)=>{
   let tx = driver.session().beginTransaction();

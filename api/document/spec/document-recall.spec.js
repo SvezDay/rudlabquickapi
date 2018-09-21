@@ -4,6 +4,7 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../../../server');
 let should = chai.should();
+let expect = chai.expect;
 chai.use(chaiHttp);
 
 const path = require('path');
@@ -101,7 +102,7 @@ describe('TEST DOCUMENT - RECALL FLOW #A', ()=>{
       RETURN count(is)
       `;
       chai.request('http://localhost:3200')
-      .post('/dev/query').set('x-access-token',token).send({'query':query})
+      .post('/dev/query').set('x-access-token',token).send({query:query})
       .end((err, res)=>{
         res.should.have.status(200);
         res.body.data.should.be.an('array')
@@ -613,7 +614,7 @@ describe('TEST DOCUMENT - RECALL FLOW #B & #G', ()=>{
         done();
       })
     })
-    it('should check flow D with 2 recall', (done)=>{
+    it('should check flow E with 2 recall', (done)=>{
       let query = `
       MATCH (p:Person{email:'bruce@wayne.com'})
       MATCH (p)-[:Recall]->(ir:IndexRecall)-[:Recall]->(r:Recall)
@@ -624,7 +625,7 @@ describe('TEST DOCUMENT - RECALL FLOW #B & #G', ()=>{
       .end((err, res)=>{
         res.should.have.status(200);
         res.body.data.should.be.an('array')
-        res.body.data[0].should.equal(6);
+        res.body.data[0].should.equal(2);
         done();
       })
     })
@@ -638,7 +639,6 @@ describe('TEST DOCUMENT - RECALL FLOW #B & #G', ()=>{
     })
   })
 })
-
 describe('TEST DOCUMENT - RECALL FLOW #C', ()=>{
   let docs = {};
   // Prérequis::
@@ -770,4 +770,138 @@ describe('TEST DOCUMENT - RECALL FLOW #C', ()=>{
       })
     })
   })
+})
+
+describe('TEST DOCUMENT - RECALL WITH BIG DICO IMPORTED', ()=>{
+  let docs = {};
+  // Prérequis::
+  // 1 document 1 note recallable and 1 note undefined, who will be update to be recallable later
+  describe('IMPORT DICO',()=>{
+    it('should import dico', (done)=>{
+      chai.request('http://localhost:3200')
+      .put('/api/games/update-brut-data').set('x-access-token',token).send({file:'ef4.data.js'})
+      .end((err, res)=>{
+        res.should.have.status(200);
+        res.body.data.should.have.property('index');
+        docs = res.body.data;
+        done();
+      })
+    })
+    xit('should check with a recallable document', (done)=>{
+      let query = `
+      MATCH (p:Person)
+      OPTIONAL MATCH path=(p)-[*]->(i:Index)-[:Has]->(ts:Title)
+      RETURN {index:{uuid:i.uuid}} `;
+
+      chai.request('http://localhost:3200').post('/dev/query').set('x-access-token',token).send({query:query})
+      .end((err, res)=>{
+        // console.log(err);
+        res.should.have.status(200);
+        res.body.data.length.should.equal(1);
+        // expect(typeof res.body.data[0].index.uuid).to.be.an('string');
+        docs = res.body.data[0];
+        done();
+      })
+    })
+  })
+  describe('CALL THE RECALL METHODS',()=>{
+    it('should flow', (done)=>{
+      chai.request('http://localhost:3200')
+      .put('/api/recall/update-recallable-state').set('x-access-token',token).send({'idx_uuid':docs.index.uuid, 'status':true, 'descendant':false})
+      .end((err, res)=>{
+        // console.log('err:', err)
+        res.should.have.status(200);
+        done();
+      })
+    })
+    it('should check flow B with a recallable document', (done)=>{
+      let query = `
+      MATCH (p:Person{email:'bruce@wayne.com'})
+      MATCH (p)-[*]->(is:Index)-[:Has]->(ts:Title{recallable:true})
+      RETURN count(is)
+      `;
+      chai.request('http://localhost:3200')
+      .post('/dev/query').set('x-access-token',token).send({'query':query})
+      .end((err, res)=>{
+        res.should.have.status(200);
+        res.body.data.should.be.an('array')
+        res.body.data[0].should.equal(1);
+        done();
+      })
+    })
+    // it('should check flow B with one recall', (done)=>{
+    //   let query = `
+    //   MATCH (p:Person{email:'bruce@wayne.com'})
+    //   MATCH (p)-[:Recall]->(ir:IndexRecall)-[:Recall]->(r:Recall)
+    //   RETURN count(r)
+    //   `;
+    //   chai.request('http://localhost:3200')
+    //   .post('/dev/query').set('x-access-token',token).send({'query':query})
+    //   .end((err, res)=>{
+    //     res.should.have.status(200);
+    //     res.body.data.should.be.an('array')
+    //     res.body.data[0].should.equal(2);
+    //     done();
+    //   })
+    // })
+  })
+  xdescribe('DELETE PREREQUIS', ()=>{
+    it('should create second note', (done)=>{
+      chai.request('http://localhost:3200')
+      .post('/api/document/create-note').set('x-access-token',token).send({parent_uuid:docs.notes[0].uuid, model:'blank', code_label:5.2}) // code_label:definition
+      .end((err, res)=>{
+        res.should.have.status(200);
+        docs.notes.push(res.body.data);
+        done();
+      })
+    })
+    it('should have one document', (done)=>{
+      chai.request('http://localhost:3200')
+      .get('/api/document/get-main').set('x-access-token',token)
+      .end((err, res)=>{
+        res.should.have.status(200);
+        res.body.data.length.should.equal(1);
+        done();
+      })
+    })
+    it('should check flow E with one recallable document', (done)=>{
+      let query = `
+      MATCH (p:Person{email:'bruce@wayne.com'})
+      MATCH (p)-[*]->(is:Index)-[:Has]->(ts:Title{recallable:true})
+      RETURN count(is)
+      `;
+      chai.request('http://localhost:3200')
+      .post('/dev/query').set('x-access-token',token).send({'query':query})
+      .end((err, res)=>{
+        res.should.have.status(200);
+        res.body.data.should.be.an('array')
+        res.body.data[0].should.equal(1);
+        done();
+      })
+    })
+    it('should check flow D with 2 recall', (done)=>{
+      let query = `
+      MATCH (p:Person{email:'bruce@wayne.com'})
+      MATCH (p)-[:Recall]->(ir:IndexRecall)-[:Recall]->(r:Recall)
+      RETURN count(r)
+      `;
+      chai.request('http://localhost:3200')
+      .post('/dev/query').set('x-access-token',token).send({'query':query})
+      .end((err, res)=>{
+        res.should.have.status(200);
+        res.body.data.should.be.an('array')
+        res.body.data[0].should.equal(6);
+        done();
+      })
+    })
+    it('should delete document', (done)=>{ // delete this document for the other test
+      chai.request('http://localhost:3200')
+      .delete('/api/document/delete-document').set('x-access-token',token).set('idx_uuid',docs.index.uuid)
+      .end((err, res)=>{
+        res.should.have.status(200);
+        done();
+      })
+    })
+  })
+
 })
