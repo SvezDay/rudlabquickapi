@@ -14,7 +14,7 @@ let graphReq = require('../../_services/graph.request');
 // COMMON ----------------------------------------------------------------------
 let common = require('../../_models/common.data');
 // CONTROLLER ------------------------------------------------------------------
-let updateRecallableState = require('./update-recallable-state.ctrl').updateRecallableState;
+let urs = require('./update-recallable-state.ctrl');
 
 module.exports.createCombination = (graph, model)=>{ // Input: graph{index,nodes[]}, model  |  Output: [{from, to, idx_uuid}]
   return new Promise((resolve, reject)=>{
@@ -32,48 +32,83 @@ module.exports.createCombination = (graph, model)=>{ // Input: graph{index,nodes
     resolve(comb);
   })
 }
+let ii = 0;
 module.exports.getDicoColumn = (tx, item_uuid)=>{
   // return ExtendColumnGraph
   return new Promise((resolve, reject)=>{
+    ii++;
     let languageLabels = common.labels.filter(x=>x.type=="language").map(x=>x.code_label);
+
     let query = `
       WITH [] AS list
       MATCH (item:Note{uuid:$item_uuid})
-      WITH item + list AS list
+      WITH list + item AS list, item
       OPTIONAL MATCH (item)-[*]->(ns:Note) WHERE ns.code_label in $labels
       WITH list + ns As list, ns
-      RETURN { notes:COLLECT( DISTINCT {uuid:ns.uuid, code_label:ns.code_label} ) }
+      UNWIND list AS listu
+      RETURN COLLECT( DISTINCT {uuid:listu.uuid, code_label:listu.code_label} )
     `;
+    // RETURN { notes:COLLECT( DISTINCT {uuid:ns.uuid, code_label:ns.code_label} ) }
     return tx.run(query, {item_uuid:item_uuid, labels:languageLabels}).then(parser.parse)
-    // .then(data => {console.log("getColumn data:", data); return data; })
+    .then(data => {
+      if(ii==1) {
+        // console.log('languageLabels', languageLabels)
+        // console.log("getColumn data:", data[0])
+      };
+      return data;
+    })
     .then(data => resolve(data[0]) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'recall/create-recall.ctrl/getColumn'}); })
   })
 }
 module.exports.getDicoRow = (tx, trad_uuid)=>{
+  // Si et uniquement si une définition existe pour une traduction alors
   // return 2 combinations, (traduction -> definition et definition -> traduction)
+  // sinon return un tableau vide
   return new Promise((resolve, reject)=>{
+    let def_code_label = 5.2;
     let query = `
       MATCH (i:Index)-[]->(t:Title)-[]->(trad:Note{uuid:$trad_uuid})
-      OPTIONAL MATCH (trad)-[]->(def:Note)
+      OPTIONAL MATCH (trad)-[]->(def:Note{code_label:$def_code_label})
       RETURN { trad:{uuid:trad.uuid}, def:{uuid:def.uuid}, index:{uuid:i.uuid} }
     `;
-    return tx.run(query, {trad_uuid:trad_uuid}).then(parser.parse)
-    // .then(data => {console.log("getDicoRow data:", data); return data; })
-    .then(data => resolve([{q:data[0].trad, a:data[0].def, idx_uuid:data[0].index.uuid}, {q:data[0].def, a:data[0].trad, idx_uuid:data[0].index.uuid}]) )
+    return tx.run(query, {trad_uuid:trad_uuid, def_code_label:def_code_label}).then(parser.parse)
+    // .then(data => {
+    //   // if(!data.length){
+    //   //   console.log("trad_uuid", trad_uuid)
+    //   console.log("====================================================");
+    //     console.log("getDicoRow data:", data);
+    //   // }
+    //   return data; })
+    .then(data=> {
+      // console.log("data of getDicoRow", data.length)
+      //     console.log("trad_uuid", trad_uuid)
+      if(!!data.length && !!data[0].def.uuid){
+        // console.log("data of getDicoRow", data)
+        resolve([{q:data[0].trad, a:data[0].def, idx_uuid:data[0].index.uuid}, {q:data[0].def, a:data[0].trad, idx_uuid:data[0].index.uuid}])
+      }else{
+        resolve([])
+      }
+    })
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'recall/create-recall.ctrl/getColumn'}); })
   })
 }
-module.exports.getRowCombinations = (column)=>{
+module.exports.getRowCombinations = (tx, column)=>{
   // return 2 combinations, (traduction -> definition et definition -> traduction)
+  // seulement si il y a des définition aux traductions, sinon rowCombinations est vide
   return new Promise((resolve, reject)=>{
+    // console.log("column", column)
     let promises = [];
     let rowCombinations = [];
     for(var i=0; i<column.length; i++){
-      let work = this.getDicoRow(tx, column[i].uuid).then(d=> rowCombinations.push(d) )
+      let work = this.getDicoRow(tx, column[i].uuid)
+      .then(d=> { if(!!d.length){ rowCombinations.push(d) } })
       promises.push(work);
     }
-    Promise.all(promises).then(()=> resolve(rowCombinations) )
+
+    Promise.all(promises)
+    // .then(()=> {console.log("rowCombinations", rowCombinations); return rowCombinations} )
+    .then(()=> resolve(rowCombinations) )
   })
 }
 module.exports.getDicoItems = (tx, idx_uuid)=>{ // Return array of graphColumn
@@ -88,11 +123,13 @@ module.exports.getDicoItems = (tx, idx_uuid)=>{ // Return array of graphColumn
     .then(itemList=>{
       // itemList correspond aux premières notes d'un même model dico
         if(!!itemList[0].items.length){
+          // console.log('itemList[0].items', itemList[0].items)
           let combinations = [];
           return bluebird.each(itemList[0].items, (x, i) => {
-            console.log("checker ", i)
+            // console.log("checker ", i)
             return this.getDicoColumn(tx, x.uuid)
             .then(column => {
+              // console.log("column.length", column.length)
               if(column.length > 1){
                 return this.createCombination({index:{uuid:idx_uuid}, nodes:column}, 'dico').then(cc=>combinations.push(cc)).then(()=>{return column})
               }else{
@@ -101,7 +138,8 @@ module.exports.getDicoItems = (tx, idx_uuid)=>{ // Return array of graphColumn
             })
             .then(column => {
               // Retourne un couple de combinaisons entre traduction et définition
-              if(column.length > 1){ return this.getRowCombinations(column).then(rc => combinations.push(rc) ) }else{ return }
+              // console.log('column', column)
+              if(column.length > 1){ return this.getRowCombinations(tx, column).then(rc => combinations.push(rc) ) }else{ return }
             })
           })
           // .then(()=> {console.log('list', combinations)} )
@@ -127,7 +165,6 @@ module.exports.getCombination = (tx, uid, idx_uuid, model)=>{ //  Input: idx_uui
         .then(graph => this.createCombination(graph, model) )
         .then(result => combs.push(...result) )
       }else if (model=="dico") {
-
         return this.getDicoItems(tx, idx_uuid)
         .then(result => combs.push(...result) )
       }
@@ -139,22 +176,27 @@ module.exports.getCombination = (tx, uid, idx_uuid, model)=>{ //  Input: idx_uui
 module.exports.createRecall = (tx, uid, idx_uuid, model)=> { // Input: uid, idx_uuid  |  Output: void
     return new Promise((resolve, reject)=>{
       let now = new Date().getTime();
+
       Promise.resolve()
       .then(()=> this.getCombination(tx, uid, idx_uuid, model) )
       .then(combs=>{
 
-        console.log("IN CreateRecall function, combs: ", combs)
+        // console.log("IN CreateRecall function, combs: ", combs)
         if(!!combs.length){
           let query = `MATCH (ir:IndexRecall{idx_uuid:$idx_uuid}) `
           for (let i = 0; i<combs.length; i++) {
-            query += `
-            CREATE (r_${i}:Recall {uuid:apoc.create.uuid(), q:'${combs[i].q}', a:'${combs[i].a}', level:0, deadline:toInteger($now), status:true })
-            CREATE (ir)-[rel_${i}:Recall]->(r_${i}) `
+            if(!!combs[i].length){
+              // console.log("combs[i] if length", combs[i])
+              query += `
+              CREATE (r_${i}:Recall {uuid:apoc.create.uuid(), q:'${combs[i][0].q}', a:'${combs[i][0].a}', level:0, deadline:toInteger($now), status:true })
+              CREATE (ir)-[rel_${i}:Recall]->(r_${i}) `
+            }
           }
+          console.log("query", query)
           return tx.run(query, {uid:uid, now:now, idx_uuid:idx_uuid})
         }else{
           // S'il n'y a pas de recall à créer alors Index Recall n'a pas lieu d'être cré
-          return updateRecallableState(tx, idx_uuid, false, false);
+          return urs.updateRecallableState(tx, uid, idx_uuid, false, false);
         }
 
       })
@@ -166,7 +208,7 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid, model  |  Output: 
   let tx = driver.session().beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
-  ps.now = new Date().getTime();
+  // ps.now = new Date().getTime();
 
   let recall;
   validator.uuid(ps.idx_uuid, "ps.idx_uuid")

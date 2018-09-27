@@ -29,7 +29,7 @@ module.exports.createDocument = (tx, model, parent_uuid)=>{
       let one = `
       MATCH (parent{uuid:$parent_uuid})
       CREATE (idx:Index{commitList: [$now], model: $model, uuid:apoc.create.uuid()})
-      CREATE (t:Title {value:'Undefined', uuid:apoc.create.uuid(), recallable: false, code_label:1.2})`;
+      CREATE (t:Title {value:'Undefined', uuid:apoc.create.uuid(), recallable: 'false', code_label:1.2})`;
 
       let two=` CREATE (parent)-[:Manage]->(idx)-[:Has{commit:$now}]->(t)`;
       for(var i = 0; i<nativeLabel.length; i++){
@@ -40,7 +40,7 @@ module.exports.createDocument = (tx, model, parent_uuid)=>{
       // console.log("query", one+two)
       return tx.run(one+two, {parent_uuid:parent_uuid, model:model, now:now}).then(parser.parse)
     })
-    // .then(data => {console.log(data); return data; })
+    // .then(data => {console.log('data createDocument', data); return data; })
     .then(data=> resolve(data[0]) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'model-defined/create.ctrl.js/createModel'}); })
   })

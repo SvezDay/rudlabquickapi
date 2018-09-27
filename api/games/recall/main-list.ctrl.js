@@ -22,7 +22,7 @@ module.exports.mainList = (tx, uid)=>{
     let one =
       `MATCH (pers:Person{uuid:$uid})
       OPTIONAL MATCH (pers)-[:Recall]->(ir:IndexRecall) WHERE ir.nextDeadline < $now
-      RETURN {idx_uuid:ir.idx_uuid}`;
+      RETURN COLLECT( DISTINCT {idx_uuid:ir.idx_uuid})`;
 
       tx.run(one, {uid:uid, now:now}).then(parser.parse)
     .then(data => {

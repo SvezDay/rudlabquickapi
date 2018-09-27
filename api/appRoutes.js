@@ -7,7 +7,12 @@ const express = require('express');
 // const multer = require('multer');
 // const upload = multer()
 
-module.exports = ()=>{
+module.exports.sockets = function(server){
+  let io = require('socket.io').listen(server);
+  let nsp = require('./games/games.sockets')(io);
+}
+
+module.exports.routes = ()=>{
    let routes = express.Router();
    routes
 

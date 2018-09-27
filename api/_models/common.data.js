@@ -142,7 +142,7 @@ module.exports = {
   // By:                  Input: model              Output: native_label
   ,getNativeLabelByModel(model){
     return new Promise((resolve, reject)=>{
-      console.log("model", model)
+      // console.log("model", model)
       let list = this.models.find(x=>x.name==model).native_label;
       Promise.resolve().then(() =>{
         resolve(list)

@@ -23,6 +23,7 @@ module.exports.deleteDocument = (tx, idx_uuid)=>{ //  Input: tx, idx_uuid  |  Ou
     DETACH DELETE ns, t, i
     `;
     tx.run(one, {idx_uuid:idx_uuid})
+    .then(()=> deleteIndexRecall(tx, idx_uuid) )
     .then(()=> resolve() )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/delete-document-recursively.ctrl.js/deleteDocument'}); })
   })

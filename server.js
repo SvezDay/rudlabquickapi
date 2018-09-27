@@ -8,14 +8,31 @@ const favicon = require('serve-favicon');
 const chokidar = require('chokidar');
 
 const AuthRoutes = require('./specialRoutes/authRoutes');
-const appRoutes = require('./api/appRoutes');
+const appRoutes = require('./api/appRoutes').routes;
 const tokenRoutes = require('./api/tokenRoutes');
-const watcher = chokidar.watch('./api');
+// const watcher = chokidar.watch('./api');
 
 const app = express();
 const port = process.env.PORT || 3200;
+let server = app.listen(port);
+let io = require('./api/appRoutes').sockets(server)
 
-app.listen(port);
+
+// SOCKET MANAGEMENT
+// let server = require('http').createServer(app);
+// let io = require('socket.io').listen(server);
+// let games = io.of('/games');
+// games.on('connection', socket=>{
+//   console.log("connection socket")
+//   socket.on('gamesConnection', ss=>{
+//     console.log('connection from games module !')
+//   })
+//   socket.on('updateBrutData', ss=>{
+//     console.log('connection from games module !', ss)
+//     socket.emit('updateBrutDataResponse', 'receive !')
+//   })
+// })
+
 
 let allowCrossDomain = (req, res, next)=>{
    res.header("Access-Control-Allow-Origin", "http://localhost:5000", "http://localhost:4200", "https://rudlabquickapp2.herokuapp.com");
@@ -79,16 +96,20 @@ if(process.env.NODE_ENV=='dev'){
   app.use('/devUid', tokenRoutes.tokenDecoding, require('./devRoutes/methodTesting.dev')());
 }
 
-if(process.env.NODE_ENV !== 'production'){
-  watcher.on('ready', function(){
-    watcher.on('all', function(){
-      // console.log("Clearing /dist/ module cache from server")
-      Object.keys(require.cache).forEach(function(id) {
-        if (/[\/\\]app[\/\\]/.test(id)) delete require.cache[id]
-      })
-    })
-  })
-}
+// if(process.env.NODE_ENV !== 'production'){
+//   watcher.on('ready', function(){
+//     watcher.on('all', function(){
+//       // console.log("Clearing /dist/ module cache from server")
+//       Object.keys(require.cache).forEach(function(id) {
+//         if (/[\/\\]app[\/\\]/.test(id)) delete require.cache[id]
+//       })
+//     })
+//   })
+// }
+
+
+
+
 
 
 console.log('API server started on: localhost:' + port);

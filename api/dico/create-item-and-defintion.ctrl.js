@@ -21,19 +21,24 @@ const ecg=require('./read-extend-column-graph.ctrl');
 * Input: tx, idx_uuid, code_label
 * Output: void
 */
+// let num = 0;
 module.exports.createItemAndDefintion = (tx, idx_uuid, item_code_label, item_value, def_code_label, def_value)=>{
   return new Promise((resolve, reject)=>{
-    // console.log("item_value", item_value)
+    // console.log("idx_uuid:"+idx_uuid+" - item_value:"+ item_value+" - def_value: "+def_value)
+    // num++;
+    // console.log('num: '+num)
     // resolve()
     let query = `
       MATCH (i:Index{uuid:$idx_uuid})-[]->(t:Title)
       CREATE (item:Note{uuid:apoc.create.uuid(), code_label:$item_code_label, value:$item_value})
       CREATE (def:Note{uuid:apoc.create.uuid(), code_label:$def_code_label, value:$def_value})
       CREATE (t)-[hi:Has]->(item)-[hd:Has]->(def)
+      RETURN item
     `;
 
     tx.run(query, {idx_uuid:idx_uuid, item_code_label:item_code_label, item_value:item_value, def_code_label:def_code_label, def_value:def_value})
-    .then(() =>{ resolve() })
+    // .then(parser.parse).then(data=>{console.log(data)})
+    .then(() =>resolve())
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || '_dico/create-item.ctrl.js/createItem'}); })
   })
 };

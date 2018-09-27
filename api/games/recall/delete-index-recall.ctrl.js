@@ -14,7 +14,7 @@ let miscellaneous = require('../../_services/miscellaneous.request');
 
 module.exports.deleteIndexRecall = (tx, idx_uuid)=>{ // Input: idx_uuid  |  Output:  void
   return new Promise((resolve, reject)=>{
-    // console.log("deleteIndexRecall", idx_uuid)
+    console.log("deleteIndexRecall", idx_uuid)
     let one = `
       MATCH (ir:IndexRecall{idx_uuid:$idx_uuid})
       OPTIONAL MATCH (ir)-[]->(rs:Recall)
