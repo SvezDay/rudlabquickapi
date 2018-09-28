@@ -24,6 +24,8 @@ module.exports.createCombination = (graph, model)=>{ // Input: graph{index,nodes
       if(!!myLabList.length){
         for (z of graph.nodes) {
           if(myLabList.includes(z.code_label)){
+            // console.log("createCombination x.value", x.uuid);
+            // console.log("createCombination z.value", z.uuid);
             comb.push({q:x.uuid, a:z.uuid, idx_uuid:graph.index.uuid})
           }
         }
@@ -108,7 +110,9 @@ module.exports.getRowCombinations = (tx, column)=>{
 
     Promise.all(promises)
     // .then(()=> {console.log("rowCombinations", rowCombinations); return rowCombinations} )
+    // .then(()=>{ if(!rowCombinations.length){resolve()}else{resolve(rowCombinations)}})
     .then(()=> resolve(rowCombinations) )
+    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'recall/create-recall.ctrl/getRowCombinations'}); })
   })
 }
 module.exports.getDicoItems = (tx, idx_uuid)=>{ // Return array of graphColumn
@@ -138,18 +142,21 @@ module.exports.getDicoItems = (tx, idx_uuid)=>{ // Return array of graphColumn
             })
             .then(column => {
               // Retourne un couple de combinaisons entre traduction et définition
+              // console.log("=====================================================");
               // console.log('column', column)
-              if(column.length > 1){ return this.getRowCombinations(tx, column).then(rc => combinations.push(rc) ) }else{ return }
+              if(column.length > 1){
+                return this.getRowCombinations(tx, column).then(rc => {if(!!rc.length){combinations.push(rc)} } )
+              }
             })
           })
           // .then(()=> {console.log('list', combinations)} )
           .then(()=> {return combinations} )
         }else{
-          // console.log("no items.length")
+          // console.log("no items.length", itemList)
           return itemList;
         }
     })
-    // .then(data=>{console.log("getAllColumn :: data:", data.items[0].nodes); return data; })
+    // .then(data=>{console.log("getAllColumn :: data:", data); return data; })
     .then(data => resolve(data) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'recall/create-recall.ctrl/getAllColumn'}); })
   })
@@ -166,6 +173,7 @@ module.exports.getCombination = (tx, uid, idx_uuid, model)=>{ //  Input: idx_uui
         .then(result => combs.push(...result) )
       }else if (model=="dico") {
         return this.getDicoItems(tx, idx_uuid)
+        // .then(result=>{console.log("============== result", result); return result})
         .then(result => combs.push(...result) )
       }
     })
@@ -185,14 +193,14 @@ module.exports.createRecall = (tx, uid, idx_uuid, model)=> { // Input: uid, idx_
         if(!!combs.length){
           let query = `MATCH (ir:IndexRecall{idx_uuid:$idx_uuid}) `
           for (let i = 0; i<combs.length; i++) {
-            if(!!combs[i].length){
               // console.log("combs[i] if length", combs[i])
-              query += `
-              CREATE (r_${i}:Recall {uuid:apoc.create.uuid(), q:'${combs[i][0].q}', a:'${combs[i][0].a}', level:0, deadline:toInteger($now), status:true })
-              CREATE (ir)-[rel_${i}:Recall]->(r_${i}) `
-            }
+              for(let y=0; y<combs[i].length; y++){
+                query += `
+                CREATE (r_${i}${y}:Recall {uuid:apoc.create.uuid(), q:'${combs[i][y].q}', a:'${combs[i][y].a}', level:0, deadline:toInteger($now), status:true })
+                CREATE (ir)-[rel_${i}${y}:Recall]->(r_${i}${y}) `
+              }
           }
-          console.log("query", query)
+          // console.log("query", query)
           return tx.run(query, {uid:uid, now:now, idx_uuid:idx_uuid})
         }else{
           // S'il n'y a pas de recall à créer alors Index Recall n'a pas lieu d'être cré

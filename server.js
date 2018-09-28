@@ -94,6 +94,8 @@ app.use('/api', tokenRoutes.tokenDecoding, appRoutes());
 if(process.env.NODE_ENV=='dev'){
   app.use('/dev', require('./devRoutes/routes.dev')());
   app.use('/devUid', tokenRoutes.tokenDecoding, require('./devRoutes/methodTesting.dev')());
+}else{
+  process.env.NODE_ENV='production';
 }
 
 // if(process.env.NODE_ENV !== 'production'){
@@ -111,5 +113,5 @@ if(process.env.NODE_ENV=='dev'){
 
 
 
-
+console.log("process.env.NODE_ENV", process.env.NODE_ENV)
 console.log('API server started on: localhost:' + port);

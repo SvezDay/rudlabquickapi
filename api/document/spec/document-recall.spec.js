@@ -774,12 +774,11 @@ xdescribe('TEST DOCUMENT - RECALL FLOW #C', ()=>{
 })
 
 describe('TEST DOCUMENT - RECALL WITH BIG DICO IMPORTED', function(){
-  this.timeout(15000)
+  this.timeout(20000)
   let docs = {};
   // Prérequis::
   // 1 document 1 note recallable and 1 note undefined, who will be update to be recallable later
   describe('IMPORT DICO',()=>{
-
     it('should import dico', (done)=>{
       chai.request('http://localhost:3200')
       .put('/api/games/update-brut-data').set('x-access-token',token).send({file:'ef4.data.js'})
@@ -820,7 +819,7 @@ describe('TEST DOCUMENT - RECALL WITH BIG DICO IMPORTED', function(){
           if(s=="successed"){
             socket.close();
             done();
-            setTimeout(done, 15000);
+            setTimeout(done, 20000);
           }
         });
       })
@@ -858,7 +857,7 @@ describe('TEST DOCUMENT - RECALL WITH BIG DICO IMPORTED', function(){
       .end((err, res)=>{
         res.should.have.status(200);
         res.body.data.should.be.an('array')
-        res.body.data[0].should.equal(499);
+        res.body.data[0].should.equal(998);
         done();
       })
     })
