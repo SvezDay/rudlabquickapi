@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const _ = require('lodash');
 const path = require('path');
 const favicon = require('serve-favicon');
-const chokidar = require('chokidar');
+// const chokidar = require('chokidar');
 
 const AuthRoutes = require('./specialRoutes/authRoutes');
 const appRoutes = require('./api/appRoutes').routes;
