@@ -14,13 +14,13 @@ const validator = require('../_services/validator.service');
 
 module.exports.ubd = (tx, uid, file)=>{
   return new Promise((resolve, reject)=>{
-    let dcd = require('../document/create-document.ctrl').createDocument;
+    let dcd = require('../document/create-document.ctrl').createDocumentWithTitle;
     let dcid = require('../dico/create-item-and-defintion.ctrl.js').createItemAndDefintion;
 
     let datas = require(`../_datas/${file}`).data;
     let dico;
 
-    dcd(tx, 'dico', uid)
+    dcd(tx, 'dico', uid, file.match(/([a-zA-Z0-9]{1,})/g)[0])
     // .then(data => {console.log('data', data); dico = data; })
     // .then(data=> dico = data )
     .then(data=>{

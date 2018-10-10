@@ -15,11 +15,33 @@ const commonData = require('../_models/common.data');
 // CONTROLLER ------------------------------------------------------------------
 // const root = require('./get-main.ctrl');
 
-/*
-* Input: tx, parent_uuid, model:string
-* Output: void
-*/
-module.exports.createDocument = (tx, model, parent_uuid)=>{
+module.exports.createDocumentWithTitle = (tx, model, parent_uuid, title)=>{ // Input: tx, model, parent_uuid, title   | Output: index, title
+  return new Promise((resolve, reject)=>{
+    let now = new Date().getTime();
+
+    commonData.getNativeLabelByModel(model)
+    .then(nativeLabel =>{
+      // console.log('nativeLabel ==============', nativeLabel)
+      let one = `
+      MATCH (parent{uuid:$parent_uuid})
+      CREATE (idx:Index{commitList: [$now], model: $model, uuid:apoc.create.uuid()})
+      CREATE (t:Title {value:$title, uuid:apoc.create.uuid(), recallable: 'false', code_label:1.2})`;
+
+      let two=` CREATE (parent)-[:Manage]->(idx)-[:Has{commit:$now}]->(t)`;
+      for(var i = 0; i<nativeLabel.length; i++){
+        one+=` CREATE (n${i}:Note{uuid:apoc.create.uuid(), code_label:${nativeLabel[i]}, value:'Undefined'}) `;
+        two+=`-[:Has{commit:$now}]->(n${i})`
+      }
+      two += ' RETURN {index:{uuid:idx.uuid, model:idx.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable, code_label:t.code_label}}'
+      // console.log("query", one+two)
+      return tx.run(one+two, {parent_uuid:parent_uuid, model:model, now:now, title:title}).then(parser.parse)
+    })
+    // .then(data => {console.log('data createDocument', data); return data; })
+    .then(data=> resolve(data[0]) )
+    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/create-document.ctrl.js/createDocumentWithTitle'}); })
+  })
+}
+module.exports.createDocument = (tx, model, parent_uuid)=>{ // Input: tx, model, parent_uuid   | Output: index, title
   return new Promise((resolve, reject)=>{
     let now = new Date().getTime();
 
@@ -42,7 +64,7 @@ module.exports.createDocument = (tx, model, parent_uuid)=>{
     })
     // .then(data => {console.log('data createDocument', data); return data; })
     .then(data=> resolve(data[0]) )
-    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'model-defined/create.ctrl.js/createModel'}); })
+    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/create-document.ctrl.js/createDocument'}); })
   })
 }
 /*
