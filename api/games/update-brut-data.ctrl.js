@@ -19,7 +19,7 @@ module.exports.ubd = (tx, uid, file)=>{
 
     let datas = require(`../_datas/${file}`).data;
     let dico;
-
+    
     dcd(tx, 'dico', uid, file.match(/([a-zA-Z0-9]{1,})/g)[0])
     // .then(data => {console.log('data', data); dico = data; })
     // .then(data=> dico = data )

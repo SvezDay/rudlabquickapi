@@ -36,7 +36,7 @@ module.exports.getColumnGraph = (tx, item_uuid)=>{
       return tx.run(query, {item_uuid:item_uuid, defCode:defCode}).then(parser.parse)
     })
     // tx.run(query).then(graph => {console.log('graph result column', graph); return graph}).then(parser.parse)
-    // .then(data => {console.log('graph result', data); return data})
+    .then(data => {console.log('graph result', data); return data})
     .then(data=>resolve(data[0]) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || '_dico/read-extend-column-graph.ctrl.js/getColumnGraph'}); })
   })
@@ -79,7 +79,7 @@ module.exports.getRowGraph = (tx, columnGraph)=>{
         return data;
       }
     })
-    // .then(data => {console.log('graph result', data[0]); return data})
+    .then(data => {console.log('graph result', data[0]); return data})
     .then(data=>resolve(data[0]) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'dico/read-extend-column-graph.ctrl.js/getRowGraph'}); })
 
@@ -94,7 +94,7 @@ module.exports.main = (req, res, next)=>{
   let ps = req.headers;
   let tx = driver.session().beginTransaction();
   ps.uid = req.decoded.uuid;
-  // console.log('check headers', ps)
+  console.log('check headers', ps)
 
   validator.uuid(ps.item_uuid, 'ps.item_uuid')
   .then(() => miscellaneousReq.access2Note(tx, ps.uid, ps.item_uuid) )
