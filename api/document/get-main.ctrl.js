@@ -25,8 +25,8 @@ module.exports.getMain = (tx, uid)=>{
       WHERE i.model in list
       RETURN {index:{uuid:i.uuid, model:i.model}, title:{uuid:t.uuid, value:t.value, recallable:t.recallable, code_label:t.code_label}} `;
 
-      // console.log('model_documentation', model_documentation)
-      // console.log("query", query)
+      console.log('model_documentation', model_documentation)
+      console.log("query", query)
     tx.run(query, {model_documentation:model_documentation, uid:uid}).then(parser.parse)
     // .then(result=>{console.log(result); return result; })
     .then(result=>resolve(result) )

@@ -11,7 +11,7 @@ const validator = require('../../_services/validator.service');
 let miscellaneous = require('../../_services/miscellaneous.request');
 // COMMON ----------------------------------------------------------------------
 // CONTROLLER ------------------------------------------------------------------
-
+let uirnd = require('./update-index-recall-next-deadline.ctrl');
 module.exports.getRecall = (tx, uid, idx_uuid)=>{ // Input: idx.uuid   |  Output: Recall || message
   return new Promise((resolve, reject)=>{
     let now = new Date().getTime();
@@ -95,6 +95,7 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: {recall
   .then(() => this.getRecall(tx, ps.uid, ps.idx_uuid) )
   .then(recall => {
     // console.log('recall 2', recall)
+    //
     if(!!recall.uuid){
        return this.getQA(tx, recall)
        .then(data => {
