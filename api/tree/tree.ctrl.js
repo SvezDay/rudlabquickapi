@@ -72,7 +72,8 @@ module.exports.getTreeFromRoot = (tx, uid)=>{
 * Output: {headGraph, ancestor:[headGraph], titleDescendant[headGraph], noteDescendant[headGraph]}
 */
 module.exports.main = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
   console.log('ps', ps)
@@ -86,6 +87,6 @@ module.exports.main = (req, res, next)=>{
     }
   })
   .then(data => {console.log("tree", data); return data} )
-  .then(data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'tree/tree.ctrl.js/lose'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'tree/tree.ctrl.js/lose'}, res, tx)} )
 };

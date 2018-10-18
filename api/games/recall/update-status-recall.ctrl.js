@@ -26,7 +26,8 @@ module.exports.updateStatusRecall = (tx, recall_uuid, status)=>{ // Input: recal
 }
 
 module.exports.main = (req, res, next)=>{ // Input: recall_uuid, status |  Output:  void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body.recall;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
@@ -37,6 +38,6 @@ module.exports.main = (req, res, next)=>{ // Input: recall_uuid, status |  Outpu
 
   .then(()=> this.updateStatusRecall(tx, ps.recall_uuid, ps.status) )
 
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'games/recall/update-status-recall.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'games/recall/update-status-recall.ctrl.js/main'}, res, tx)} )
 };

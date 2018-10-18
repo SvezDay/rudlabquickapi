@@ -81,7 +81,8 @@ module.exports.getQA = (tx, recall)=>{
 }
 
 module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: {recall, q, a}
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
@@ -109,6 +110,6 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: {recall
     }
   })
   // .then(data=>{console.log('data', data); return data; })
-  .then(data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'recall/run.ctrl.js/main'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'recall/run.ctrl.js/main'}, res, tx)} )
 };

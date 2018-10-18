@@ -32,7 +32,8 @@ module.exports.updateLabel = (tx, first_uuid, up_uuid, code_label)=>{ // Input: 
 
 module.exports.main = (req, res, next)=>{ // Input:  first_uuid, up_uuid, code_label  |  Output: VocabularyGraph
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.first_uuid, 'ps.first_uuid')
@@ -41,6 +42,6 @@ module.exports.main = (req, res, next)=>{ // Input:  first_uuid, up_uuid, code_l
   .then(()=> miscellaneousReq.access2Note(tx, ps.uid, ps.first_uuid) )
   .then(()=> miscellaneousReq.access2Note(tx, ps.uid, ps.up_uuid) )
   .then(() => this.updateLabel(tx, ps.first_uuid, ps.up_uuid, ps.code_label) )
-  .then(graph=>utils.commit(tx, res, ps.uid, graph) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/update-label.ctr.js/main'}, res, tx)} )
+  .then(graph=>utils.commit(session, tx, res, ps.uid, graph) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/update-label.ctr.js/main'}, res, tx)} )
 };

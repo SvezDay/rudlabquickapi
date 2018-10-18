@@ -41,12 +41,13 @@ module.exports.updateStatusRecall = (tx, uid)=>{ // Input: none  | Output: [{rec
 }
 module.exports.main = (req, res, next)=>{ // Input: recall_uuid, status |  Output:  [{recall,index, title, q, a}]
 
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body.recall;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
 
   this.suspendedRecallList(tx, ps.uid)
-  .then(data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'games/recall/suspended-recall-list.ctrl.js/main'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'games/recall/suspended-recall-list.ctrl.js/main'}, res, tx)} )
 };

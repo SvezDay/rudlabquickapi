@@ -60,12 +60,13 @@ module.exports.getDetail = (tx, uid, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let sesion = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps', ps)
   Promise.resolve()
   .then(()=> {return this.getDetail(tx, ps.uid, ps.uuid)} )
   // .then(data=>{console.log('==================== graph detail', data); return data})
-  .then(data=>utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'free/graph-detail.ctrl.js/main'}, res, tx)} )
+  .then(data=>utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'free/graph-detail.ctrl.js/main'}, res, tx)} )
 };

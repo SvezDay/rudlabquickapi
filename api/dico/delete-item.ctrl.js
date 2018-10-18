@@ -48,7 +48,7 @@ module.exports.main = (req, res, next)=>{
 
   .then(() => this.deleteItem(tx, ps.delete_uuid) )
 
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/delete-item.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/delete-item.ctrl.js/main'}, res, tx)} )
 
 };

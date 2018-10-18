@@ -14,7 +14,8 @@ module.exports = (io)=>{
 
     socket.on('update-recallable-state', ss=>{
       // console.log('ss.token', ss.token)
-      let tx = driver.session().beginTransaction();
+//       let session = driver.session();
+// let tx = session.beginTransaction();
       let uid = verify(ss.token).uuid;
       console.log("============================================================")
       socket.emit('update-recallable-state-response', 'ongoing');

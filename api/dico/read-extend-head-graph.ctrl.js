@@ -46,7 +46,8 @@ module.exports.getExtendHeadGraph = (tx, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.idx_uuid)
@@ -54,6 +55,6 @@ module.exports.main = (req, res, next)=>{
 
   .then(() => this.getExtendHeadGraph(tx, ps.idx_uuid) )
 
-  .then(graph=>utils.commit(tx, res, ps.uid, graph) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/read-extend-head-graph.ctr.js/main'}, res, tx)} )
+  .then(graph=>utils.commit(session, tx, res, ps.uid, graph) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/read-extend-head-graph.ctr.js/main'}, res, tx)} )
 };

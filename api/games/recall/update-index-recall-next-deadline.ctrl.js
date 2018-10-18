@@ -29,7 +29,8 @@ module.exports.updateIndexRecallNextDeadline = (tx, uid, idx_uuid)=>{
 }
 
 module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
 
@@ -38,6 +39,6 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid  |  Output: void
   .then(()=> miscellaneous.access2Any(tx, ps.uid, ps.idx_uuid))
 
   .then(() => this.updateIndexRecallNextDeadline(tx, ps.uid, ps.idx_uuid) )
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'recall/update-index-recall-next-deadline.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'recall/update-index-recall-next-deadline.ctrl.js/main'}, res, tx)} )
 };

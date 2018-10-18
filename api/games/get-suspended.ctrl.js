@@ -17,7 +17,8 @@ const validator = require('../_services/validator.service');
 * Output: list[{recall, from, to}]
 */
 module.exports.main = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session()
+  let tx = session.beginTransaction();
   let ps = req.body;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
@@ -51,6 +52,6 @@ module.exports.main = (req, res, next)=>{
     return tx.run(one+two).then(parser.parse)
   })
   .then(data => {console.log("data, after getFromTo ", data); return data})
-  .then(data => utils.commit(tx, res, ps.uid, data[0]) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'game/get-suspended.ctrl.js/main'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data[0]) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'game/get-suspended.ctrl.js/main'}, res, tx)} )
 };

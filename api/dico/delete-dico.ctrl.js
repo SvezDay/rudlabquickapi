@@ -43,14 +43,15 @@ module.exports.deleteDico = (tx, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! delete dico ps',ps)
 
   validator.uuid(ps.idx_uuid)
   .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
   .then(() => this.deleteDico(tx, ps.idx_uuid) )
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/delete-dico.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/delete-dico.ctrl.js/main'}, res, tx)} )
 
 };

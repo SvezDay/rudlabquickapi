@@ -35,7 +35,8 @@ module.exports.updateTitle = (tx, uuid, value)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.up_uuid, 'ps.up_uuid')
@@ -45,6 +46,6 @@ module.exports.main = (req, res, next)=>{
   .then(() => { return miscellaneousReq.access2Any(tx, ps.uid, ps.up_uuid) })
   .then(()=> {return this.updateTitle(tx, ps.up_uuid, ps.value)} )
   .then(()=> {return graphReq.getHeadGraph(tx, ps.idx_uuid)} )
-  .then(graph=>utils.commit(tx, res, ps.uid, graph) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/update-title.ctrl.js/main'}, res, tx)} )
+  .then(graph=>utils.commit(session, tx, res, ps.uid, graph) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'document/update-title.ctrl.js/main'}, res, tx)} )
 };

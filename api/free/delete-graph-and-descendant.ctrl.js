@@ -42,13 +42,14 @@ module.exports.delDocIndex = (tx, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let sesion = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.idx_uuid)
   .then(() => {return miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) })
   .then(() => {return this.delDocIndex(tx, ps.idx_uuid) })
-  .then( result => { utils.commit(tx, res, ps.uid, result[0]) })
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'free/delete-graph-and-descendant.ctrl.js/main'}, res, tx)} )
+  .then( result => { utils.commit(session, tx, res, ps.uid, result[0]) })
+  .catch(err =>{console.log(err); utils.fail(session,{status: err.status || 400, mess: err.mess || 'free/delete-graph-and-descendant.ctrl.js/main'}, res, tx)} )
 
 };

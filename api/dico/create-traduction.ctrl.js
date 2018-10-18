@@ -50,7 +50,8 @@ module.exports.createTraduction = (tx, item_uuid, code_label)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
   // console.log("================================================================ CREATE TRADUCTION")
@@ -64,6 +65,6 @@ module.exports.main = (req, res, next)=>{
 
   // .then(() => ecg.getColumnGraph(tx, ps.uid, ps.item_uuid) )
   // .then(list => ecg.getRowGraph(tx, ps.uid, list) )
-  .then( data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/create-traduction.ctrl.js/main'}, res, tx)} )
+  .then( data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/create-traduction.ctrl.js/main'}, res, tx)} )
 };

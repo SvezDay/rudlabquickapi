@@ -37,12 +37,13 @@ module.exports.createActivity = (tx, uid)=>{
 module.exports.main = (req, res, next)=>{
   // Return an activity
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.uid, 'ps.uid')
   .then(()=> this.createActivity(tx, ps.uid) )
-  .then( data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'activity/create-activity.ctrl.js/main'}, res, tx)} )
+  .then( data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'activity/create-activity.ctrl.js/main'}, res, tx)} )
 
 };

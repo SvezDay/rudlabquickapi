@@ -25,7 +25,8 @@ module.exports.deleteRecall = (tx, note_uuid)=>{ // Input: note_uuid  |  Output:
 }
 
 module.exports.main = (req, res, next)=>{ // Input: note_uuid  |  Output: void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
 
@@ -34,6 +35,6 @@ module.exports.main = (req, res, next)=>{ // Input: note_uuid  |  Output: void
 
   .then(() => this.deleteRecall(tx, ps.note_uuid) )
 
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'recall/delete-recall.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'recall/delete-recall.ctrl.js/main'}, res, tx)} )
 };

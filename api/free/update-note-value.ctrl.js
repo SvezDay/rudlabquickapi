@@ -34,7 +34,8 @@ module.exports.updateNote = (tx, uuid, value)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let sesion = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
 
@@ -45,6 +46,6 @@ module.exports.main = (req, res, next)=>{
   .then(() => miscellaneousReq.access2Note(tx, ps.uid, ps.up_uuid) )
   .then(()=> this.updateNote(tx, ps.up_uuid, ps.value) )
   .then(()=> detail.getDetail(tx, ps.uid, ps.idx_uuid) )
-  .then(graph=>utils.commit(tx, res, ps.uid, graph) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'free/updaate-note-value.ctrl.js/main'}, res, tx)} )
+  .then(graph=>utils.commit(session, tx, res, ps.uid, graph) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'free/updaate-note-value.ctrl.js/main'}, res, tx)} )
 };

@@ -92,7 +92,8 @@ module.exports.getRowGraph = (tx, columnGraph)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   console.log('check headers', ps)
 
@@ -102,6 +103,6 @@ module.exports.main = (req, res, next)=>{
   .then(() => this.getColumnGraph(tx, ps.item_uuid) )
   .then(data => this.getRowGraph(tx, data) )
   // Promise.resolve()
-  .then(data=>utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/read-extend-column-graph.ctr.js/main'}, res, tx)} )
+  .then(data=>utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/read-extend-column-graph.ctr.js/main'}, res, tx)} )
 };

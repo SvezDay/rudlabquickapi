@@ -7,7 +7,8 @@ const validator = require('../api/_services/validator.service');
 let tokenGen = require('../api/_services/token.service');
 
 module.exports.methodTesting = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let path = require(req.body.path);
   let params = req.body.params;
 
@@ -19,11 +20,12 @@ module.exports.methodTesting = (req, res, next)=>{
       return path[req.body.method](tx, params[1]);
     }
   })
-  .then(data=>{ tx.commit(); res.status(200).json(data[0]); })
-  .catch(err=>{ tx.rollback(); res.status(400).json({err:err})})
+  .then(data=>{ tx.commit(); session.close(); res.status(200).json(data[0]); })
+  .catch(err=>{ tx.rollback(); session.close(); res.status(400).json({err:err})})
 };
 module.exports.methodTestingUid = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let path = require(req.body.path);
   let params = req.body.params;
 
@@ -36,8 +38,8 @@ module.exports.methodTestingUid = (req, res, next)=>{
     }
   })
   .then(data=>{console.log(data); return data})
-  .then(data=>{ tx.commit(); res.status(200).json(data); })
-  .catch(err=>{ tx.rollback(); res.status(400).json({err:err})})
+  .then(data=>{ tx.commit(); session.close(); res.status(200).json(data); })
+  .catch(err=>{ tx.rollback(); session.close(); res.status(400).json({err:err})})
 };
 // ====================== ROUTES ==================================
 module.exports = ()=>{

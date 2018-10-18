@@ -50,7 +50,8 @@ module.exports.scoring = (tx, state, recall_uuid, level)=>{ // Input: state, rec
 
 
 module.exports.main = (req, res, next)=>{ // Input: recall_uuid, level, state |  Output:  void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body;
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
@@ -63,6 +64,6 @@ module.exports.main = (req, res, next)=>{ // Input: recall_uuid, level, state | 
 
   .then(()=> this.scoring(tx, ps.state, ps.recall_uuid, ps.level) )
 
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'games/recall/scoring.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'games/recall/scoring.ctrl.js/main'}, res, tx)} )
 };

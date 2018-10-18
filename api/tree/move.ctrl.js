@@ -46,7 +46,8 @@ module.exports.moveWithDescendant = (tx, uid, idx_uuid, destination_uuid)=>{
 * Output: headGraph
 */
 module.exports.main = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body;
   ps.uid = req.decoded.uuid;
 
@@ -61,6 +62,6 @@ module.exports.main = (req, res, next)=>{
       throw {status: 403, mess: err || 'ERROR on move tree cause no method for this job yet'}
     }
   })
-  .then(data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'tree/move.ctrl.js/lose'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'tree/move.ctrl.js/lose'}, res, tx)} )
 };

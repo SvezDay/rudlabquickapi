@@ -19,7 +19,7 @@ module.exports.ubd = (tx, uid, file)=>{
 
     let datas = require(`../_datas/${file}`).data;
     let dico;
-    
+
     dcd(tx, 'dico', uid, file.match(/([a-zA-Z0-9]{1,})/g)[0])
     // .then(data => {console.log('data', data); dico = data; })
     // .then(data=> dico = data )
@@ -39,11 +39,12 @@ module.exports.ubd = (tx, uid, file)=>{
 
 module.exports.main = (req, res, next)=>{
   // permet d'implémenter manuellement une grande quantité de données
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body;
   ps.uid = req.decoded.uuid;
 
   this.ubd(tx, ps.uid, ps.file)
-  .then(dico => utils.commit(tx, res, ps.uid, dico) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'game/get-suspended.ctrl.js/main'}, res, tx)} )
+  .then(dico => utils.commit(session, tx, res, ps.uid, dico) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'game/get-suspended.ctrl.js/main'}, res, tx)} )
 };

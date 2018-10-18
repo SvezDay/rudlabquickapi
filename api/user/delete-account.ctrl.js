@@ -37,12 +37,13 @@ module.exports.deleteAccount = (tx, uid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   Promise.resolve()
   .then(() => {return this.deleteAccount(tx, ps.uid) })
-  .then(() => { utils.commit(tx, res, ps.uid) })
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'user/delete-account.ctrl.js/main'}, res, tx)} )
+  .then(() => { utils.commit(session, tx, res, ps.uid) })
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'user/delete-account.ctrl.js/main'}, res, tx)} )
 
 };

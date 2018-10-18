@@ -75,7 +75,8 @@ module.exports.createRelationOrder = (tx, idx_uuid, order_list)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let sesion = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
   // console.log('ps', ps)
@@ -85,6 +86,6 @@ module.exports.main = (req, res, next)=>{
   .then(()=> this.compareOrder(tx, ps.idx_uuid, ps.order_list) )
   .then(()=> this.deleteOldRelation(tx, ps.idx_uuid) )
   .then(()=> this.createRelationOrder(tx, ps.idx_uuid, ps.order_list) )
-  .then(()=> { utils.commit(tx, res, ps.uid) })
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'free/update-order.ctrl.js/main'}, res, tx)} )
+  .then(()=> { utils.commit(session, tx, res, ps.uid) })
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'free/update-order.ctrl.js/main'}, res, tx)} )
 };

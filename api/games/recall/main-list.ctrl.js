@@ -106,12 +106,13 @@ module.exports.convertToDeveloppedTree = (data)=>{
 }
 
 module.exports.main = (req, res, next)=>{
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
 
   ps.uid = req.decoded.uuid;
   this.mainList(tx, ps.uid)
   // .then(data=> this.convertToDeveloppedTree(data))
-  .then(data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'recall/main-list.ctrl.js/main'}, res, tx)} )
+  .then(data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'recall/main-list.ctrl.js/main'}, res, tx)} )
 };

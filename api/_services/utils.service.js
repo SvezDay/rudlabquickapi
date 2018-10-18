@@ -10,15 +10,16 @@ const self = {
   * promise method: .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'extend-column-graph.ctr.js / getRowGraph / columnGraph.length is false'}); })
   * throw: {status:400, mess: 'extend-column-graph.ctr.js / getRowGraph / columnGraph.length is false'}
   */
-  , fail: (e, res, tx)=>{
+  , fail: (session, e, res, tx)=>{
     console.log(' ===============================================ERROR MESSAGE: ');
     console.log(' STATUS: ',e.status);
     console.log(' MESSAGE: ',e.mess);
     if(tx) tx.rollback();
+    session.close();
     // res.status(e.status || 400).json({mess: e.mess || null, error: e.err || e})
     res.status(e.status || 400).json(e);
   }
-  , commit: (tx, res, id, p)=>{
+  , commit: (session, tx, res, id, p)=>{
     let exp = self.expire();
     let params = {
       token: tokenGen(id, exp),
@@ -27,6 +28,7 @@ const self = {
     };
     // console.log("in commit p", p.stat)
     tx.commit();
+    session.close();
     // res.status(p && p.stat || 200).json(params);
     res.status(200).json(params);
   }

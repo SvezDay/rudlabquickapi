@@ -73,7 +73,10 @@ module.exports.createDocument = (tx, model, parent_uuid)=>{ // Input: tx, model,
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  // let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
+
   ps.uid = req.decoded.uuid;
   // console.log('=============================================================', ps)
 
@@ -86,6 +89,6 @@ module.exports.main = (req, res, next)=>{
     return this.createDocument(tx, ps.model, ps.parent_uuid)
   })
   // .then(data => {console.log('data of main()',data); return data; })
-  .then(data=> utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/create-document.ctr.js/main'}, res, tx)} )
+  .then(data=> utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'document/create-document.ctr.js/main'}, res, tx)} )
 };

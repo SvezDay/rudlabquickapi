@@ -52,7 +52,8 @@ module.exports.updateRecallableState = (tx, uid, idx_uuid, status, descendant)=>
 };
 
 module.exports.main = (req, res, next)=>{ // Input: idx_uuid, status(boolean), descendant(boolean)  |  Output: void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.body;
   ps.uid = req.decoded.uuid;
 
@@ -61,6 +62,6 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid, status(boolean), d
   .then(() => validator.boolean(ps.descendant, "ps.descendant") )
   .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
   .then(() => this.updateRecallableState(tx, ps.uid, ps.idx_uuid, ps.status, ps.descendant))
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'games/recall/update-recallable-state.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'games/recall/update-recallable-state.ctrl.js/main'}, res, tx)} )
 };

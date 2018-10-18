@@ -53,13 +53,15 @@ module.exports.delDocIndex = (tx, idx_uuid)=>{ // Input: idx_uuid || Output: {re
 
 module.exports.main = (req, res, next)=>{ //  Input: idx_uuid  |  Output: true or false
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  // let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   console.log('typ', ps)
   validator.uuid(ps.idx_uuid, 'ps.idx_uuid')
   .then(()=> miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
   .then(()=> this.delDocIndex(tx, ps.idx_uuid) )
-  .then(()=> utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log('||||||||||||||||||||||||||||||||||||||||||||||||',err); utils.fail({status: err.status || 400, mess: err.mess || 'document/delete-document.ctrl.js/main'}, res, tx)} )
+  .then(()=> utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log('||||||||||||||||||||||||||||||||||||||||||||||||',err); utils.fail(session,{status: err.status || 400, mess: err.mess || 'document/delete-document.ctrl.js/main'}, res, tx)} )
 
 };

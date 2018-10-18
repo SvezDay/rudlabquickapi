@@ -44,7 +44,8 @@ module.exports.createItem = (tx, idx_uuid, code_label)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('====================================================================== create item')
   // console.log('ps', ps)
@@ -63,6 +64,6 @@ module.exports.main = (req, res, next)=>{
 
   // .then(()=> ehg.getExtendHeadGraph(tx, ps.idx_uuid) )
   // .then(result => {console.log('data result', result); return result})
-  .then(data=> utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/create-item.ctrl.js/main'}, res, tx)} )
+  .then(data=> utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/create-item.ctrl.js/main'}, res, tx)} )
 };

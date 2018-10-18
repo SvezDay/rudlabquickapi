@@ -58,13 +58,15 @@ module.exports.getDetail = (tx, uid, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  // let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps', ps)
   validator.uuid(ps.idx_uuid)
   .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
   .then(()=> this.getDetail(tx, ps.uid, ps.idx_uuid) )
   // .then(data=>{console.log('==================== graph detail', data); return data})
-  .then(data=>utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/read-extend-document.ctrl.js/main'}, res, tx)} )
+  .then(data=>utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'document/read-extend-document.ctrl.js/main'}, res, tx)} )
 };

@@ -39,12 +39,14 @@ module.exports.getMain = (tx, uid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  // let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps main getMain', ps)
 
   this.getMain(tx, ps.uid)
-  .then( data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/get-main.ctr.js/main'}, res, tx)} )
+  .then( data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(sessionn, {status: err.status || 400, mess: err.mess || 'document/get-main.ctr.js/main'}, res, tx)} )
 
 };

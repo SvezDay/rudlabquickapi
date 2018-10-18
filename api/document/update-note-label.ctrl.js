@@ -33,7 +33,8 @@ module.exports.updateLabel = (tx, uuid, code_label)=>{ //  Input: tx, uuid, code
 
 module.exports.main = (req, res, next)=>{ // Input: idx_uuid, up_uuid, code_label  |  Output: ExtendGraph
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
 
   validator.uuid(ps.idx_uuid, "ps.idx_uuid")
@@ -45,6 +46,6 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid, up_uuid, code_labe
   .then(()=> this.updateRecall(tx, ps.up_uuid, ps.code_label) )
   .then(()=> detail.getDetail(tx, ps.uid, ps.idx_uuid) )
 
-  .then(result=> { utils.commit(tx, res, ps.uid, result) })
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/update-note.ctrl.js/main'}, res, tx)} )
+  .then(result=> { utils.commit(session, tx, res, ps.uid, result) })
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'document/update-note.ctrl.js/main'}, res, tx)} )
 };

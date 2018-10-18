@@ -37,14 +37,15 @@ module.exports.createEvent = (tx, parent_uuid)=>{
 module.exports.main = (req, res, next)=>{
   // Return an event
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps', ps)
 
   validator.uuid(ps.parent_uuid, 'ps.parent_uuid')
   .then(()=> miscellaneous.access2Any(tx, ps.uid, ps.parent_uuid))
   .then(()=> this.createEvent(tx, ps.parent_uuid) )
-  .then( data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'activity/create-event.ctrl.js/main'}, res, tx)} )
+  .then( data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'activity/create-event.ctrl.js/main'}, res, tx)} )
 
 };

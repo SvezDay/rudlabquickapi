@@ -67,7 +67,8 @@ module.exports.updateRecall = (tx, uid, idx_uuid, note_uuid, code_label)=> { // 
 
 
 module.exports.main = (req, res, next)=>{ // Input: idx_uuid, note_uuid, code_label  |  Output: void
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
   let ps = req.headers;
   ps.uid = req.decoded.uuid;
 
@@ -77,7 +78,7 @@ module.exports.main = (req, res, next)=>{ // Input: idx_uuid, note_uuid, code_la
   .then(()=> miscellaneous.access2Index(tx, ps.uid, ps.idx_uuid))
 
   .then(() => this.updateRecall(tx, ps.uid, ps.idx_uuid, ps.note_uuid, ps.code_label) )
-  
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'recall/update-recall.ctrl.js/main'}, res, tx)} )
+
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'recall/update-recall.ctrl.js/main'}, res, tx)} )
 };

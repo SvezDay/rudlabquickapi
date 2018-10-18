@@ -10,7 +10,8 @@ let tokenGen = require('../api/_services/token.service');
 // @Params:ps [text:email, text:password, text:first, text:last]
 module.exports.manual_register = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
 
   let query = `
   MATCH (a:Person{email:$email})
@@ -42,19 +43,20 @@ module.exports.manual_register = (req, res, next)=>{
   .then(()=>{ return tx.run(query, ps) }).then(parser.parse)
   .then( data => {
     if(data[0].uuid && data[0].first){
-      utils.commit(tx, res, data[0].uuid,{first:data[0].first})
+      utils.commit(session, tx, res, data[0].uuid,{first:data[0].first})
     }else {
       throw {status: 403, mess: data.error || 'no data returned after manual_register'};
     }
   })
-  .catch(e => { utils.fail(e, res, tx) })
+  .catch(e => { utils.fail(ession, e, res, tx) })
 };
 
 
 // @Params:ps [text:email, text:password]
 module.exports.manual_authenticate = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+let tx = session.beginTransaction();
 
   let query = `
   MATCH (a:Person{email:$email, password:$password})
@@ -68,7 +70,7 @@ module.exports.manual_authenticate = (req, res, next)=>{
     // console.log('====================================================== manual_authenticate')
     // console.log('data', data)
     if(data[0].uuid && data[0].first){
-      utils.commit(tx, res, data[0].uuid,{first:data[0].first})
+      utils.commit(session, tx, res, data[0].uuid,{first:data[0].first})
     }else {
       throw {
         status: 403,
@@ -76,5 +78,5 @@ module.exports.manual_authenticate = (req, res, next)=>{
       };
     }
   })
-  .catch(e => { console.log('check', e); utils.fail(e, res, tx) })
+  .catch(e => { console.log('check', e); utils.fail(session, e, res, tx) })
 };

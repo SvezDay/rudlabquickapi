@@ -63,7 +63,8 @@ module.exports.deleteTraduction = (tx, env)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! delete traduction ps',ps)
 
@@ -73,7 +74,7 @@ module.exports.main = (req, res, next)=>{
   .then(() => this.getTraductionEnvironnement(tx, ps.traduction_uuid) )
   .then(data => this.deleteTraduction(tx, data) )
 
-  .then(() => utils.commit(tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/delete-traduction.ctrl.js/main'}, res, tx)} )
+  .then(() => utils.commit(session, tx, res, ps.uid) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/delete-traduction.ctrl.js/main'}, res, tx)} )
 
 };

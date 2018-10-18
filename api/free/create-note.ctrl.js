@@ -37,7 +37,8 @@ module.exports.createNote = (tx, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let sesion = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();
 
@@ -47,6 +48,6 @@ module.exports.main = (req, res, next)=>{
   .then(() => this.createNote(tx, ps.uuid) )
 
   .then(() => detail.getDetail(tx, ps.uid, ps.uuid) )
-  .then( data => utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'free/create-note.ctrl.js/main'}, res, tx)} )
+  .then( data => utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'free/create-note.ctrl.js/main'}, res, tx)} )
 };

@@ -46,7 +46,9 @@ module.exports.deleteNote = (tx, note_uuid)=>{ // Input: tx, note_uuid  | Output
 
 module.exports.main = (req, res, next)=>{ // Input: note_uuid   |  Output: void
   let ps = req.headers;
-  let tx = driver.session().beginTransaction();
+  // let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log("ps", ps)
 
@@ -56,6 +58,6 @@ module.exports.main = (req, res, next)=>{ // Input: note_uuid   |  Output: void
   .then(()=>  this.deleteNote(tx, ps.note_uuid))
   .then(()=> deleteRecall(tx, ps.note_uuid) )
 
-  .then(data=> utils.commit(tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/main'}, res, tx)} )
+  .then(data=> utils.commit(session, tx, res, ps.uid, data) )
+  .catch(err =>{console.log(err); utils.fail(session,{status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/main'}, res, tx)} )
 };

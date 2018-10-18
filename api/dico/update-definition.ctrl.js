@@ -21,7 +21,8 @@ const ecg=require('./read-extend-column-graph.ctrl');
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let tx = driver.session().beginTransaction();
+  let session = driver.session();
+  let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('======================================================================')
   // console.log('ps', ps)
@@ -38,6 +39,6 @@ module.exports.main = (req, res, next)=>{
     return tx.run(query, ps).then(parser.parse)
   })
   .then(data => {console.log('data result', data); return data})
-  .then(data=>utils.commit(tx, res, ps.uid, data[0]) )
-  .catch(err =>{console.log(err); utils.fail({status: err.status || 400, mess: err.mess || 'dico/update-definition.ctr.js/main'}, res, tx)} )
+  .then(data=>utils.commit(session, tx, res, ps.uid, data[0]) )
+  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/update-definition.ctr.js/main'}, res, tx)} )
 };
