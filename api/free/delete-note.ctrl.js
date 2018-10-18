@@ -75,7 +75,7 @@ module.exports.deleteNote = (tx, note_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.headers;
-  let sesion = driver.session();
+  let session = driver.session();
   let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();

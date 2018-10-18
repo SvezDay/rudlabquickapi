@@ -34,7 +34,7 @@ module.exports.updateNote = (tx, uuid, value)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let sesion = driver.session();
+  let session = driver.session();
   let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   ps.now = new Date().getTime();

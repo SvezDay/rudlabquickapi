@@ -60,7 +60,7 @@ module.exports.getDetail = (tx, uid, idx_uuid)=>{
 */
 module.exports.main = (req, res, next)=>{
   let ps = req.body;
-  let sesion = driver.session();
+  let session = driver.session();
   let tx = session.beginTransaction();
   ps.uid = req.decoded.uuid;
   // console.log('ps', ps)
