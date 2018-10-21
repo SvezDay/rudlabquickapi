@@ -26,11 +26,14 @@ const self = {
       exp: exp,
       data: p
     };
-    // console.log("in commit p", p.stat)
-    tx.commit();
-    session.close();
-    // res.status(p && p.stat || 200).json(params);
-    res.status(200).json(params);
+    // console.log("in commit tx", tx)
+    // console.log("in commit session", session)
+    Promise.resolve()
+    .then(()=>tx.commit())
+    .then(()=>{
+      session.close();
+      res.status(200).json(params);
+    })
   }
   , respond: (res, id, p)=>{ // This commit respond without any db transaction
     let exp = self.expire();
