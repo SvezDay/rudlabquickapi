@@ -37,7 +37,7 @@ module.exports.scoring = (tx, state, recall_uuid, level)=>{ // Input: state, rec
     .then(()=>{
       if(state=='win'){
         console.log("scoring WIN")
-        console.log("level", level)
+        console.log("level: ", level)
         // newLevel = 2 * !level ? 1 : level == 1 ? 2 : level // the level formula is: 0 1 2 4 8 16 32 ...
         newLevel = !level ? 1 : 2 * level // the level formula is: 0 1 2 4 8 16 32 ...
         newDeadline = JSON.stringify(now + (newLevel * 24 * 60 * 60 * 1000) )
